@@ -87,9 +87,13 @@ def traverse_smartform(data: Dict[str, Any]) -> List[Dict[str, str]]:
 
 # ---- API endpoint ----
 @app.post("/explain-smartform")
-async def explain_smartform(data: Dict[str, Any]):
+async def explain_smartform(data: List[Dict[str, Any]]):
     try:
-        return traverse_smartform(data)
+        all_results = []
+        for d in data:
+            results = traverse_smartform(d)
+            all_results.extend(results)
+        return all_results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
