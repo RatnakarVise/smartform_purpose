@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import os, json
 from langchain_openai import ChatOpenAI
@@ -23,9 +23,9 @@ app = FastAPI(title="SmartForm Window Explanation API")
 class WindowSnippet(BaseModel):
     page_name: Optional[str] = None
     window_name: Optional[str] = None
-    fields: Optional[List[str]] = []
-    tables: Optional[List[str]] = []
-    code: Optional[List[str]] = []
+    fields: List[str] = Field(default_factory=list)
+    tables: List[str] = Field(default_factory=list)
+    code: List[str] = Field(default_factory=list)
 
 # ---- LLM chain builder ----
 def build_chain(snippet: WindowSnippet):
