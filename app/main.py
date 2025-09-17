@@ -23,9 +23,9 @@ app = FastAPI(title="SmartForm Window Explanation API")
 class WindowSnippet(BaseModel):
     page_name: Optional[str] = None
     window_name: Optional[str] = None
-    fields: List[str] = []
-    tables: List[str] = []
-    code: List[str] = []
+    fields: Optional[List[str]] = []
+    tables: Optional[List[str]] = []
+    code: Optional[List[str]] = []
 
 # ---- LLM chain builder ----
 def build_chain(snippet: WindowSnippet):
@@ -74,9 +74,9 @@ def traverse_smartform(data: Dict[str, Any]) -> List[Dict[str, str]]:
             snippet = WindowSnippet(
                 page_name=page_name,
                 window_name=win.get("WINDOW_NAME", "Unnamed Window"),
-                fields=win.get("FIELDS", []),
-                tables=win.get("TABLES", []),
-                code=win.get("CODE", [])
+                fields=win.get("FIELDS") or [],
+                tables=win.get("TABLES") or [],
+                code=win.get("CODE") or []
             )
             try:
                 llm_result = llm_explain_window(snippet)
@@ -87,13 +87,9 @@ def traverse_smartform(data: Dict[str, Any]) -> List[Dict[str, str]]:
 
 # ---- API endpoint ----
 @app.post("/explain-smartform")
-async def explain_smartform(data: List[Dict[str, Any]]):
+async def explain_smartform(data: Dict[str, Any]):
     try:
-        all_results = []
-        for d in data:
-            results = traverse_smartform(d)
-            all_results.extend(results)
-        return all_results
+        return traverse_smartform(data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
